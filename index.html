@@ -247,6 +247,11 @@ this.onGround=true;
 this.facing=1;
 
 this.isRemote=false;
+
+this.anim = {
+  walk: 0,
+  attack: 0
+}; 
 }
 
 update(enemy){
@@ -267,6 +272,17 @@ activateDomain();
 
 this.physicsRemote();
 
+}
+
+// animation update
+if (Math.abs(this.vx) > 0.5 && this.onGround) {
+  this.anim.walk += 0.2;
+} else {
+  this.anim.walk *= 0.9;
+}
+
+if (this.anim.attack > 0) {
+  this.anim.attack--;
 }
 
 }
@@ -414,7 +430,7 @@ enemy.type==="fire")
 ){
 
 damage *= 2;
-
+this.anim.attack = 10;
 showCutin(
 "ELEMENTAL OVERLOAD ⚡🔥",
 "cyan"
@@ -498,7 +514,7 @@ showCutin(
 "ULTIMATE RELEASE 💥",
 this.color
 );
-
+this.anim.attack = 20;
 screenShake(35);
 screenFlash(12);
 
@@ -575,27 +591,28 @@ ctx.lineTo(this.x,this.y);
 
 ctx.stroke();
 
-// arms
-ctx.beginPath();
+let walk = Math.sin(this.anim.walk);
+let attack = this.anim.attack > 0 ? 1 : 0;
 
-ctx.moveTo(this.x,this.y-20);
-ctx.lineTo(this.x-15,this.y-10);
+// body anchor points
+let sx = this.x;
+let sy = this.y - 20;
 
-ctx.moveTo(this.x,this.y-20);
-ctx.lineTo(this.x+15,this.y-10);
+// ARMS (attack pushes forward)
+let leftArm  = (-0.8 + walk * 0.6) + (attack * -1.8);
+let rightArm = (0.8 - walk * 0.6) + (attack * -2.2);
 
-ctx.stroke();
+// LEGS (walking only)
+let leftLeg  = (1.2 + walk * 0.8);
+let rightLeg = (1.2 - walk * 0.8);
 
-// legs
-ctx.beginPath();
+// draw arms
+drawLimb(ctx, sx, sy, leftArm, 25);
+drawLimb(ctx, sx, sy, rightArm, 25);
 
-ctx.moveTo(this.x,this.y);
-ctx.lineTo(this.x-10,this.y+20);
-
-ctx.moveTo(this.x,this.y);
-ctx.lineTo(this.x+10,this.y+20);
-
-ctx.stroke();
+// draw legs
+drawLimb(ctx, this.x, this.y, leftLeg, 30);
+drawLimb(ctx, this.x, this.y, rightLeg, 30);
 }
 
 }
